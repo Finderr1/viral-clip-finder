@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Viral Clip Finder</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont;
+      background: linear-gradient(135deg, #020617, #0f172a);
+      color: white;
+      padding: 20px;
+    }
+    h1 {
+      font-size: 2rem;
+      margin-bottom: 10px;
+    }
+    input {
+      width: 100%;
+      padding: 12px;
+      border-radius: 10px;
+      border: none;
+      margin-bottom: 20px;
+      font-size: 1rem;
+    }
+    .tabs button {
+      background: #1e293b;
+      color: white;
+      border: none;
+      padding: 10px 14px;
+      margin-right: 8px;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    .tabs button.active {
+      background: #facc15;
+      color: black;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 14px;
+      margin-top: 20px;
+    }
+    .card {
+      background: #020617;
+      padding: 14px;
+      border-radius: 14px;
+      border: 1px solid #1e293b;
+    }
+    .tag {
+      font-size: 0.75rem;
+      background: #1e293b;
+      display: inline-block;
+      padding: 4px 8px;
+      border-radius: 6px;
+      margin-top: 8px;
+    }
+  </style>
+</head>
+<body>
+
+<h1>🔥 Viral Clip Finder</h1>
+<p>Describe what happened in the clip</p>
+
+<input id="search" placeholder="e.g. guy drops wedding cake in slow motion" />
+
+<div class="tabs">
+  <button class="active">Search</button>
+  <button>Trending</button>
+  <button>Saved</button>
+</div>
+
+<div class="grid">
+  <div class="card">
+    <h3>Streamer rages after losing ranked match</h3>
+    <p>Popular Twitch clip where streamer slams desk</p>
+    <span class="tag">Gaming</span>
+  </div>
+
+  <div class="card">
+    <h3>Dog jumps into pool to save toy</h3>
+    <p>Wholesome viral dog moment</p>
+    <span class="tag">Animals</span>
+  </div>
+
+  <div class="card">
+    <h3>Guy drops wedding cake in slow motion</h3>
+    <p>Embarrassing but funny wedding fail</p>
+    <span class="tag">Fails</span>
+  </div>
+</div>
+
+</body>
+</html>
