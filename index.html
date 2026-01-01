@@ -2,200 +2,144 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Viral Clip Finder</title>
-
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
     body {
+      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
       margin: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background: #0f172a;
-      color: #e5e7eb;
+      background: #0f0f0f;
+      color: #fff;
     }
-
     header {
       padding: 16px;
       text-align: center;
-      font-size: 22px;
+      font-size: 24px;
       font-weight: bold;
-      background: #020617;
-      border-bottom: 1px solid #1e293b;
+      background: #181818;
     }
-
-    .tabs {
+    nav {
       display: flex;
       justify-content: space-around;
-      background: #020617;
+      background: #202020;
     }
-
-    .tab {
+    nav button {
       flex: 1;
-      padding: 12px;
-      text-align: center;
-      cursor: pointer;
-      color: #94a3b8;
+      padding: 14px;
+      background: none;
+      border: none;
+      color: white;
+      font-size: 16px;
     }
-
-    .tab.active {
-      color: #38bdf8;
-      border-bottom: 2px solid #38bdf8;
+    nav button.active {
+      background: #ff0000;
     }
-
     .container {
       padding: 16px;
     }
-
     input {
       width: 100%;
       padding: 14px;
       font-size: 16px;
-      border-radius: 10px;
+      border-radius: 8px;
       border: none;
-      outline: none;
-      background: #020617;
-      color: #e5e7eb;
       margin-bottom: 12px;
     }
-
-    button {
-      width: 100%;
-      padding: 14px;
-      font-size: 16px;
-      border-radius: 10px;
-      border: none;
-      background: #38bdf8;
-      color: #020617;
-      font-weight: bold;
-      cursor: pointer;
-    }
-
-    .clip {
-      background: #020617;
-      border-radius: 12px;
+    .video {
+      background: #1e1e1e;
       padding: 12px;
-      margin-top: 12px;
-      border: 1px solid #1e293b;
+      border-radius: 10px;
+      margin-bottom: 12px;
     }
-
-    .clip-title {
+    .video img {
+      width: 100%;
+      border-radius: 8px;
+    }
+    .video a {
+      color: #4ea1ff;
+      text-decoration: none;
       font-weight: bold;
-      margin-bottom: 6px;
-    }
-
-    .save-btn {
-      margin-top: 8px;
-      background: #1e293b;
-      color: #38bdf8;
-    }
-
-    .hidden {
-      display: none;
     }
   </style>
 </head>
-
 <body>
 
-<header>Viral Clip Finder</header>
+<header>Viral Clip Finder 🔍</header>
 
-<div class="tabs">
-  <div class="tab active" onclick="showTab('search')">Search</div>
-  <div class="tab" onclick="showTab('trending')">Trending</div>
-  <div class="tab" onclick="showTab('saved')">Saved</div>
+<nav>
+  <button class="active" onclick="switchTab('search')">Search</button>
+  <button onclick="switchTab('saved')">Saved</button>
+</nav>
+
+<div class="container" id="search">
+  <input id="query" placeholder="Describe the viral clip..." />
+  <button onclick="search()">Find Videos</button>
+  <div id="results"></div>
 </div>
 
-<div class="container">
-
-  <!-- SEARCH TAB -->
-  <div id="search">
-    <input id="query" placeholder="Describe the clip you’re looking for…" />
-    <button onclick="searchClip()">Search</button>
-    <div id="searchResults"></div>
-  </div>
-
-  <!-- TRENDING TAB -->
-  <div id="trending" class="hidden">
-    <div class="clip">
-      <div class="clip-title">Man slips during proposal</div>
-      Viral proposal fail at a park
-    </div>
-    <div class="clip">
-      <div class="clip-title">Streamer breaks chair live</div>
-      Gaming stream gone wrong
-    </div>
-    <div class="clip">
-      <div class="clip-title">Teacher dances in class</div>
-      Unexpected classroom moment
-    </div>
-  </div>
-
-  <!-- SAVED TAB -->
-  <div id="saved" class="hidden">
-    <div id="savedResults"></div>
-  </div>
-
+<div class="container" id="saved" style="display:none">
+  <h3>Saved Clips</h3>
+  <div id="savedList"></div>
 </div>
 
 <script>
-  let savedClips = JSON.parse(localStorage.getItem("savedClips")) || [];
+const API_KEY = "REPLACE_WITH_YOUTUBE_API_KEY";
 
-  function showTab(tab) {
-    document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
-    document.querySelectorAll(".container > div").forEach(d => d.classList.add("hidden"));
+function switchTab(tab) {
+  document.getElementById("search").style.display = tab === "search" ? "block" : "none";
+  document.getElementById("saved").style.display = tab === "saved" ? "block" : "none";
+  document.querySelectorAll("nav button").forEach(b => b.classList.remove("active"));
+  event.target.classList.add("active");
+}
 
-    document.querySelector(`.tab[onclick="showTab('${tab}')"]`).classList.add("active");
-    document.getElementById(tab).classList.remove("hidden");
+function smartKeywords(text) {
+  return text
+    .toLowerCase()
+    .replace(/(a|the|on|with|and|while|to|of)/g, "")
+    .replace(/\s+/g, " ");
+}
 
-    if (tab === "saved") loadSaved();
-  }
+async function search() {
+  const raw = document.getElementById("query").value;
+  const query = smartKeywords(raw);
+  const res = await fetch(
+    `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${query}&type=video&maxResults=5&key=${API_KEY}`
+  );
+  const data = await res.json();
+  const container = document.getElementById("results");
+  container.innerHTML = "";
 
-  function searchClip() {
-    const q = document.getElementById("query").value;
-    if (!q) return;
-
-    const result = {
-      title: q,
-      description: "Possible viral clip matching your description"
-    };
-
-    const div = document.createElement("div");
-    div.className = "clip";
-    div.innerHTML = `
-      <div class="clip-title">${result.title}</div>
-      ${result.description}
-      <button class="save-btn" onclick='saveClip(${JSON.stringify(result)})'>Save</button>
+  data.items.forEach(v => {
+    const vid = document.createElement("div");
+    vid.className = "video";
+    vid.innerHTML = `
+      <img src="${v.snippet.thumbnails.medium.url}">
+      <p>${v.snippet.title}</p>
+      <a href="https://youtube.com/watch?v=${v.id.videoId}" target="_blank">Watch</a>
+      <button onclick="save('${v.snippet.title}','${v.id.videoId}')">Save</button>
     `;
+    container.appendChild(vid);
+  });
+}
 
-    const container = document.getElementById("searchResults");
-    container.innerHTML = "";
-    container.appendChild(div);
-  }
+function save(title, id) {
+  const saved = JSON.parse(localStorage.getItem("saved") || "[]");
+  saved.push({ title, id });
+  localStorage.setItem("saved", JSON.stringify(saved));
+  loadSaved();
+}
 
-  function saveClip(clip) {
-    savedClips.push(clip);
-    localStorage.setItem("savedClips", JSON.stringify(savedClips));
-    alert("Saved!");
-  }
+function loadSaved() {
+  const saved = JSON.parse(localStorage.getItem("saved") || "[]");
+  const list = document.getElementById("savedList");
+  list.innerHTML = "";
+  saved.forEach(v => {
+    list.innerHTML += `<div class="video"><p>${v.title}</p>
+    <a href="https://youtube.com/watch?v=${v.id}" target="_blank">Watch</a></div>`;
+  });
+}
 
-  function loadSaved() {
-    const container = document.getElementById("savedResults");
-    container.innerHTML = "";
-
-    if (savedClips.length === 0) {
-      container.innerHTML = "No saved clips yet.";
-      return;
-    }
-
-    savedClips.forEach(c => {
-      const div = document.createElement("div");
-      div.className = "clip";
-      div.innerHTML = `
-        <div class="clip-title">${c.title}</div>
-        ${c.description}
-      `;
-      container.appendChild(div);
-    });
-  }
+loadSaved();
 </script>
 
 </body>
